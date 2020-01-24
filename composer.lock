@@ -1,0 +1,60 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "0c396b5461b205947efa740b426b6921",
+    "packages": [
+        {
+            "name": "genzzz/helpers",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/genzzz/helpers.git",
+                "reference": "96f2c097b01017d10c029d3b2be3f3d049478573"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/genzzz/helpers/zipball/96f2c097b01017d10c029d3b2be3f3d049478573",
+                "reference": "96f2c097b01017d10c029d3b2be3f3d049478573",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.4",
+                "vlucas/phpdotenv": "^4.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Genzzz\\Helpers\\": "./src"
+                },
+                "files": [
+                    "files/helpers.php"
+                ]
+            },
+            "authors": [
+                {
+                    "name": "Genci Shabani",
+                    "email": "webmaster.gencishabani@gmail.com"
+                }
+            ],
+            "description": "Functions that can help development",
+            "support": {
+                "source": "https://github.com/genzzz/helpers/tree/master",
+                "issues": "https://github.com/genzzz/helpers/issues"
+            },
+            "time": "2020-01-23 23:02:58"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "genzzz/helpers": 20
+    },
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

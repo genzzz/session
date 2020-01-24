@@ -1,0 +1,33 @@
+{
+    "name": "genzzz/session",
+    "description": "Session package.",
+    "authors": [
+        {
+            "name": "Genci Shabani",
+            "email": "webmaster.gencishabani@gmail.com"
+        }
+    ],
+    "autoload":{
+        "psr-4": {
+            "Genzzz\\Session\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Genzzz\\Session\\Tests\\": "./tests"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "https://github.com/genzzz/helpers.git"
+        }
+    ],
+    "require": {
+        "genzzz/helpers": "dev-master"
+    },
+    "require-dev": {
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
