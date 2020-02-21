@@ -1,114 +1,138 @@
 <?php
 namespace Genzzz\Session;
 
+use Genzzz\Session\SessionFunctions;
+use Genzzz\Session\Handlers\Database\DatabaseHandler;
 use Genzzz\Helpers\Encrypter;
-use Genzzz\Helpers\Str;
+use SessionHandlerInterface;
 
-trait Init
+final class Init
 {
-    private $id;
-    private $encrypted_id;
-    private $session;
+    private $config;
 
-    protected function get_the_id()
+    public function __construct()
     {
-        return $this->id;
+        $this->config = config('session');
+
+        // FIXME: encryptor
+        $this->set_cookie_name();
+        $this->set_expire_on_close();
+        $this->set_session_gc_probability();
+        $this->set_cookie_params();
+        $this->set_gc_maxlifetime();
+        $this->set_session_driver();
+
+        session_start();
+
+        $GLOBALS['genzzz_sess' . session_id()] = new SessionFunctions();
     }
 
-    protected function get_the_IP()
+    private function set_session_driver()
     {
-        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : "127.0.0.1";
+        if(isset($this->config['driver'])){
+            if(in_array($this->config['driver'], $this->drivers())){
+                $handler = null;
+    
+                switch($this->config['driver']){
+                    case 'database':
+                        $handler = $this->database_handler_validation();
+                        break;
+                }
+    
+                if($handler instanceof SessionHandlerInterface){
+                    session_set_save_handler($handler);
+                    return;
+                }
+            }
+        }
+
+        if(!isset($this->config['file']) || !isset($this->config['file']['path']))
+            return;
+
+        if(!is_string($this->config['file']['path']) || $this->config['file']['path'] != '')
+            return;
+
+        if(!is_dir($this->config['file']['path']))
+            return;
+
+        session_save_path($this->config['file']['path']);
     }
 
-    protected function last_activity()
+    private function database_handler_validation()
     {
-        return time();
+        if(!isset($this->config['database']))
+            return;
+
+        $database = $this->config['database'];
+
+        if(count($database) != 3)
+            return;
+
+        if(!isset($database['connection']) || !isset($database['table']) || !isset($database['model']))
+            return;
+
+        if(!is_string($database['table']))
+            return;
+
+        return new DatabaseHandler($database);
     }
 
-    protected function get_serialized_session()
+    private function set_session_gc_probability()
     {
-        return $this->serialize_session();
+        if(!is_array($this->config['probability']))
+            return;
+
+        if(blank($this->config['probability']))
+            return;
+
+        if(count($this->config['probability']) != 2)
+            return;
+
+        if(!is_int($this->config['probability'][0]) || !is_int($this->config['probability'][1]))
+            return;
+
+        list($gc_probability, $gc_divisor) = $this->config['probability'];
+
+        ini_set('session.gc_probability', $gc_probability);
+        ini_set('session.gc_divisor', $gc_divisor);
     }
 
-    protected function set_id(string $id)
+    private function set_expire_on_close()
     {
-        $this->encrypted_id = $id;
-        $this->id = $this->decrypt_id();
-        return $this;
+        if(isset($this->config['expire_on_close']) && $this->config['expire_on_close'] === true)
+            $this->config['lifetime'] = 0;
     }
 
-    protected function encrypter($encrypter)
+    private function set_cookie_params()
     {
-        $this->encrypter = $encrypter;
-        return $this;
+        if(!isset($this->config['lifetime']) || !is_int($this->config['lifetime']))
+            return;
+
+        $this->config['lifetime'] *= 60;
+
+        if(isset($this->config['cookie'])){
+            unset($this->config['cookie']['name']);
+            $cookie = array_merge($this->config['cookie'], ['lifetime' => $this->config['lifetime']]);
+            session_set_cookie_params($cookie);
+        }
     }
 
-    protected function set_cookie_name(string $name)
+    private function set_cookie_name()
     {
-        $this->cookie_name = $name;
-        return $this;
+        if(!isset($this->config['cookie']['name']))
+            return;
+        
+        if(is_string($this->config['cookie']['name']) && $this->config['cookie']['name'] != '')
+            session_name($this->config['cookie']['name']);
     }
 
-    protected function set_expiration(int $seconds)
+    private function set_gc_maxlifetime()
     {
-        $this->expiration = time() + $seconds;
-        return $this;
+        ini_set('session.gc_maxlifetime', $this->config['lifetime']);
     }
 
-    protected function set_session($session)
+    private function drivers()
     {
-        $this->session = $this->unserialize_session($session);
-        return $this;
-    }
-
-    protected function create()
-    {
-        $this->id = Str::random(26);
-        $this->encrypted_id = $this->encrypt_id();
-        $this->set_cookie();
-        return $this;
-    }
-
-    protected function update()
-    {
-        $this->set_cookie();
-        return $this;
-    }
-
-    private function set_cookie()
-    {
-        setcookie($this->cookie_name, $this->encrypted_id, $this->expiration, '/');
-    }
-
-    private function serialize_session()
-    {
-        if(filled($this->session))
-            return serialize($this->session);
-
-        return null;
-    }
-
-    private function unserialize_session($session)
-    {
-        if(filled($session))
-            return unserialize($session);
-
-        return null;
-    }
-
-    private function encrypt_id()
-    {
-        if($this->encrypter instanceof Encrypter)
-            return $this->encrypter->encrypt($this->id);
-
-        return $this->id;
-    }
-
-    private function decrypt_id()
-    {
-        if($this->encrypter instanceof Encrypter)
-            return $this->encrypter->decrypt($this->encrypted_id);
-
-        return $this->encrypted_id;
+        return ['database'];
     }
 }
