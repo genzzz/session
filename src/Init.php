@@ -24,6 +24,16 @@ final class Init
 
         session_start();
 
+        if(!isset($_SESSION['_destroy'])){
+            $_SESSION['_destroy'] = time() + 60;
+        }
+        else{
+            if($_SESSION['_destroy'] < time()){
+                session_regenerate_id();
+                $_SESSION['_destroy'] = time() + 60;
+            }
+        }
+
         $GLOBALS['genzzz_sess' . session_id()] = new SessionFunctions();
     }
 

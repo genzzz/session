@@ -6,7 +6,7 @@ use SessionHandlerInterface;
 
 class DatabaseHandler implements SessionHandlerInterface
 {
-    private $model, $exists = false;
+    private $model, $exists;
 
     public function __construct(array $db)
     {
@@ -26,6 +26,7 @@ class DatabaseHandler implements SessionHandlerInterface
         $session = $this->model->get($id);
 
         if(blank($session)){
+            $this->exists = false;
             return '';
         }
 
@@ -42,12 +43,13 @@ class DatabaseHandler implements SessionHandlerInterface
     {
         $data = $this->get_default_data($session);
 
-        if(!$this->exists){
-            $data = array_merge($data, ['id' => $id]);
-            return $this->model->insert($data);
+        if($this->exists){
+            return $this->model->update($id, $data);
         }
 
-        return $this->model->update($id, $data);
+        $data['id'] = $id;
+        $this->exists = true;
+        return $this->model->insert($data);
     }
 
     public function close() : bool
