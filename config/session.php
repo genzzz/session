@@ -9,7 +9,7 @@ return [
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,
-    'file' => [
+    'files' => [
         'path' => path('storage/sessions')
     ],
     'database' => [
