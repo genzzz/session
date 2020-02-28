@@ -17,6 +17,10 @@ return [
         'table' => 'sessions',
         'model' => Genzzz\Session\Handlers\Database\Models\WP_Model::class
     ],
+    'redis' => [
+        'host' => 'localhost',
+        'port' => 6379
+    ],
     'probability' => [2, 100],
     'cookie' => [
         'name' => env('SESSION_COOKIE',Str::slug(env('APP_NAME', 'genzzz'), '_').'_session'),
