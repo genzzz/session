@@ -9,13 +9,17 @@ return [
     'lifetime' => 120,
     'expire_on_close' => false,
     'encrypt' => false,
-    'file' => [
+    'files' => [
         'path' => path('storage/sessions')
     ],
     'database' => [
         'connection' => env('SESSION_CONNECTION', $wpdb),
         'table' => 'sessions',
         'model' => Genzzz\Session\Handlers\Database\Models\WP_Model::class
+    ],
+    'redis' => [
+        'host' => 'localhost',
+        'port' => 6379
     ],
     'probability' => [2, 100],
     'cookie' => [

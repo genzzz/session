@@ -48,21 +48,28 @@ class WP_Model extends Model
 
     public function update(string $id, array $data) : bool
     {
+        $where = [
+            'id' => $id
+        ];
+
         return $this->db->update(
             $this->table,
             $data,
-            ['id' => $id],
+            $where,
             $this->get_columns_type($data),
-            $this->get_columns_type(['id' => $id])
+            $this->get_columns_type($where)
         );
     }
 
     public function delete(string $id) : bool
     {
+        $data = [
+            'id' => $id
+        ];
         return $this->db->delete(
             $this->table,
-            ['id' => $id],
-            $this->get_columns_type(['id' => $id])
+            $data,
+            $this->get_columns_type($data)
         );
     }
 

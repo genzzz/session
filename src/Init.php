@@ -24,6 +24,16 @@ final class Init
 
         session_start();
 
+        // if(!isset($_SESSION['_destroy'])){
+        //     $_SESSION['_destroy'] = time() + 60;
+        // }
+        // else{
+        //     if($_SESSION['_destroy'] < time()){
+        //         session_regenerate_id(true);
+        //         $_SESSION['_destroy'] = time() + 60;
+        //     }
+        // }
+
         $GLOBALS['genzzz_sess' . session_id()] = new SessionFunctions();
     }
 
@@ -37,6 +47,12 @@ final class Init
                     case 'database':
                         $handler = $this->database_handler_validation();
                         break;
+                    case 'files':
+                        $this->files_handler_validation();
+                        break;
+                    case 'redis':
+                        $this->redis_handler_validation();
+                        break;
                 }
     
                 if($handler instanceof SessionHandlerInterface){
@@ -45,17 +61,28 @@ final class Init
                 }
             }
         }
+    }
 
-        if(!isset($this->config['file']) || !isset($this->config['file']['path']))
+    private function redis_handler_validation()
+    {
+        ini_set('session.save_handler', 'redis');
+        session_save_path("tcp://{$this->config['redis']['host']}:{$this->config['redis']['port']}");
+    }
+
+    private function files_handler_validation()
+    {
+        ini_set('session.save_handler', 'files');
+
+        if(!isset($this->config['files']) || !isset($this->config['files']['path']))
             return;
 
-        if(!is_string($this->config['file']['path']) || $this->config['file']['path'] != '')
+        if(!is_string($this->config['files']['path']) || $this->config['files']['path'] != '')
             return;
 
-        if(!is_dir($this->config['file']['path']))
+        if(!is_dir($this->config['files']['path']))
             return;
 
-        session_save_path($this->config['file']['path']);
+        session_save_path($this->config['files']['path']);
     }
 
     private function database_handler_validation()
@@ -133,6 +160,6 @@ final class Init
 
     private function drivers()
     {
-        return ['database'];
+        return ['files', 'database', 'redis'];
     }
 }
